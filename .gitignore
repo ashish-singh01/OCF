@@ -1,0 +1,6 @@
+.venv
+.vscode
+node_modules
+resources_test
+/testCodes
+package-lock.json
