@@ -1,3 +1,6 @@
 pandas
 openpyxl
 flask
+bcrypt
+pymysql 
+Flask-SQLAlchemy
