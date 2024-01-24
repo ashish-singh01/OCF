@@ -11,12 +11,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{USER}:{PASSWORD}@{'lo
 #app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///users"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-#db.init_app(app)
-
-# conn = sqlite3.connect('users')
-# cursor = conn.cursor()
-
-#cursor.execute("CREATE TABLE userInfo (name VARCHAR(80),email VARCHAR(80), passwd VARCHAR(100), id int PRIMARY_KEY )")
 
 #creating userInfo table model
 class UserModel(db.Model):
@@ -50,26 +44,38 @@ def upload():
 def register():
     # userData = (request.form.items())
     #print(request.form.get('name'))
-    salt = bcrypt.gensalt()
+    #salt = bcrypt.gensalt()
     if UserModel.query.filter(UserModel.email == request.form.get('email')).first():
         return 'User already exists', 409
 
-    byte = (request.form.get('passwd')).encode('utf-8')
+    #byte = (request.form.get('passwd')).encode('utf-8')
     details = UserModel(
         id = (uuid.uuid4()),
         name = request.form.get('name'),
         email = request.form.get('email'),
-        passwd = bcrypt.hashpw(byte,salt)
+        passwd = bcrypt.hashpw((request.form.get('passwd')).encode('utf-8') , bcrypt.gensalt())
     )
     #print(details.passwd)
     db.session.add(details)
     db.session.commit()
     return 'User registered', 200
-    
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    email = request.form.get('email')
+    password = request.form.get('passwd').encode('utf-8')
+    user = UserModel.query.filter_by(email=email).first()
+    print(user.passwd)
+    if bcrypt.checkpw(password, user.passwd.encode('utf-8')):
+        print("Found User Login success")
+        return 'Login Succesful', 200
+    return "Password didn't match", 400
+
 
 if __name__ == '__main__':
     create_db()
     api = Api(app)
     api.register_blueprint(UserModel)
     app.run(debug=True)
-    
+    #'$2b$12$kfqljR4ho7JnV2y0L/KEduUa53pRkryRRfB4eKVzz2NeGBlvQuRDG'
