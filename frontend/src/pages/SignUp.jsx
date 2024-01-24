@@ -15,6 +15,7 @@ export default function SignUp() {
         await fetch("http://127.0.0.1:5000/register", {
           method: "POST",
           body: fd,
+          mode: "no-cors"
         });
       } catch (error) {
         console.error(error);
