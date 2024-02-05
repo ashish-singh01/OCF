@@ -1,4 +1,5 @@
-from flask import Flask,request
+from flask import Flask,request, jsonify
+from flask_cors import CORS
 import bcrypt
 from flask_smorest import Api, abort
 from database import USER,PASSWORD
@@ -7,6 +8,7 @@ import uuid
 #from users import UserModel
 
 app = Flask(__name__)
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{USER}:{PASSWORD}@{'localhost'}/{'users'}"
 #app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///users"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -20,12 +22,6 @@ class UserModel(db.Model):
     name = db.Column(db.String(80),  nullable=False)
     email = db.Column(db.String(80), unique=True, nullable=False)
     passwd = db.Column(db.String(80), nullable=False)
-
-    # def __init__(self, id, name, email, passwd):
-    #     id=self.id
-    #     name=self.name
-    #     email=self.email
-    #     passwd=self.passwd
 
 
 
@@ -58,7 +54,7 @@ def register():
     #print(details.passwd)
     db.session.add(details)
     db.session.commit()
-    return 'User registered', 200
+    return 'successful', 200
 
 
 @app.route('/login', methods=['POST'])
@@ -66,10 +62,11 @@ def login():
     email = request.form.get('email')
     password = request.form.get('passwd').encode('utf-8')
     user = UserModel.query.filter_by(email=email).first()
-    print(user.passwd)
+    #print(user.passwd)
     if bcrypt.checkpw(password, user.passwd.encode('utf-8')):
-        print("Found User Login success")
-        return 'Login Succesful', 200
+        # print(jsonify(user.name))
+        data={'message': user.name }
+        return jsonify(data), 200
     return "Password didn't match", 400
 
 
@@ -78,4 +75,9 @@ if __name__ == '__main__':
     api = Api(app)
     api.register_blueprint(UserModel)
     app.run(debug=True)
-    #'$2b$12$kfqljR4ho7JnV2y0L/KEduUa53pRkryRRfB4eKVzz2NeGBlvQuRDG'
+
+
+
+# username= test
+# email= test@test.com   
+# password = test
