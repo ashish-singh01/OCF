@@ -9,12 +9,16 @@ export default function SignUp() {
     const data = Object.fromEntries(fd.entries());
     if (data.passwd !== data.conPasswd) {
       alert("Password Mismatch");
-    }else{
+    } else {
       // console.log(data);
       try {
         await fetch("http://127.0.0.1:5000/register", {
           method: "POST",
           body: fd,
+        }).then((res) => {
+          if (res.status === 200) {
+            navigate("/login");
+          }
         });
       } catch (error) {
         console.error(error);
